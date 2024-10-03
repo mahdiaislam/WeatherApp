@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+        rel="stylesheet">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="card">
+        <div class="search">
+            <input type="text" placeholder="Enter City Name" spellcheck="false">
+            <button><img src="images/search.png" alt=""></button>
+        </div>
+        <div class="weather">
+            <div class="weather-icon-container">
+                <img src="images/rain.png" class="weather-icon" alt="Weather Icon">
+            </div>
+            <h1 class="temp">22°C</h1>
+            <h2 class="city">London</h2>
+            <div class="details">
+                <div class="column">
+                    <img src="images/humidity.png">
+                    <div>
+                        <p class="humidity">50%</p>
+                        <p>Humidity</p>
+                    </div>
+                </div>
+                <div class="column">
+                    <img src="images/wind.png">
+                    <div>
+                        <p class="wind">15 km/h </p>
+                        <p>Wind Speed</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+
+        const apiKey = '8484ed34b0eb4e7d8e7214932240210';
+        const baseApiUrl = `http://api.weatherapi.com/v1/current.json?key=${apiKey}&aqi=no`;
+
+        const searchBox = document.querySelector('.search input');
+        const searchBtn = document.querySelector('.search button');
+        const weatherIcon = document.querySelector('.weather-icon');
+
+        async function checkWeather(city) {
+            if (!city) {
+                console.error("Please enter a city name.");
+                return;
+            }
+
+            const apiUrl = `${baseApiUrl}&q=${encodeURIComponent(city)}`; // Encode city name for URL
+
+            try {
+                const response = await fetch(apiUrl);
+
+                // Check if the response is OK
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error("Error:", errorData);
+                    return;
+                }
+
+                const data = await response.json();
+                console.log(data);
+
+
+                document.querySelector('.city').innerHTML = data.location.name; // City name
+                document.querySelector('.temp').innerHTML = `${Math.round(data.current.temp_c)} °C`; // Temperature
+                document.querySelector('.humidity').innerHTML = `${data.current.humidity}%`; // Humidity
+                document.querySelector('.wind').innerHTML = `${data.current.wind_kph} km/h`; // Wind speed
+
+                if (weatherIcon) {
+                    if (data.current.condition.text === 'Overcast') {
+                        weatherIcon.src = 'images/clouds.png';
+                    } else {
+                        // icon provided by the API
+                        weatherIcon.src = `https:${data.current.condition.icon}`;
+                    }
+                } else {
+                    console.error("Weather icon element not found!");
+                }
+            } catch (error) {
+                console.error("Network error:", error);
+            }
+
+            document.querySelector('.weather').style.display = 'block';
+        }
+
+        searchBtn.addEventListener('click', () => {
+            checkWeather(searchBox.value.trim());
+        }); 
+    </script>
+</body>
+
+</html>
